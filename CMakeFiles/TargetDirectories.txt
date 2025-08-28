@@ -1,0 +1,3 @@
+/home/cfernandez/github/stm32-tiny-robot/CMakeFiles/STM32G491RE_Project.elf.dir
+/home/cfernandez/github/stm32-tiny-robot/CMakeFiles/edit_cache.dir
+/home/cfernandez/github/stm32-tiny-robot/CMakeFiles/rebuild_cache.dir

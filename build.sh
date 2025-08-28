@@ -2,12 +2,12 @@
 set -e
 
 BUILD_DIR=build
-ELF_FILE=$BUILD_DIR/blinky.elf
-BIN_FILE=$BUILD_DIR/blinky.bin
-HEX_FILE=$BUILD_DIR/blinky.hex
+ELF_FILE=$BUILD_DIR/STM32G491RE_Project.elf
+BIN_FILE=$BUILD_DIR/STM32G491RE_Project.bin
+HEX_FILE=$BUILD_DIR/STM32G491RE_Project.hex
 
 echo "==> Configuring project..."
-cmake -B $BUILD_DIR -DCMAKE_TOOLCHAIN_FILE=Toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+cmake -B $BUILD_DIR -DCMAKE_TOOLCHAIN_FILE=arm-gcc-toolchain.cmake -DCMAKE_BUILD_TYPE=Release
 
 echo "==> Building firmware..."
 cmake --build $BUILD_DIR
