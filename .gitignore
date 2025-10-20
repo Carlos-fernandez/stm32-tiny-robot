@@ -54,4 +54,4 @@ Thumbs.db
 *.log
 
 # Dependencies that might be downloaded
-Drivers/STM32CubeG4/
+Drivers/

@@ -27,7 +27,7 @@ set(CMSIS_CORE_DIR   ${PROJ_DIR}/Drivers/CMSIS)
 # Sources (HAL-based blink)
 set(SRCS
     ${PROJ_DIR}/src/main_hal.c
-    ${CMSIS_DEVICE_DIR}/Source/Templates/system_stm32g4xx.c
+    ${PROJ_DIR}/src/system_stm32g4xx.c
     ${CMSIS_DEVICE_DIR}/Source/Templates/gcc/startup_stm32g491xx.s
     ${HAL_DIR}/Src/stm32g4xx_hal.c
     ${HAL_DIR}/Src/stm32g4xx_hal_cortex.c
