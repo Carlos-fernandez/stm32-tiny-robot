@@ -16,96 +16,132 @@ Run the setup script to automatically configure everything:
 
 ```powershell
 # Windows PowerShell
-.\setup.ps1
-```
+# STM32 Tiny Robot (STM32G491RE)
 
-This script will:
-- ✅ Check for required development tools
-- ✅ **Automatically download minimal STM32CubeG4 HAL drivers**  
-- ✅ Configure the CMake project
-- ✅ Build the firmware  
-- ✅ Generate .elf, .hex, and .bin files
+>A lean STM32G491RE firmware template with CMake/Ninja, automatic HAL/CMSIS setup, and one-command build/flash on Windows.
 
-**✨ NEW: One-Command Setup!** CMake will automatically create minimal HAL drivers if none are found, so your project builds immediately without manual downloads!
+## Quick start
 
-### 🔄 Getting Full STM32CubeG4 Drivers (Optional)
-
-The project automatically creates **minimal HAL drivers** for immediate building. For production or advanced features:
+Windows PowerShell:
 
 ```powershell
-# Option 1: Use helper script  
-.\download-full-drivers.ps1
-
-# Option 2: Manual download
-# 1. Download STM32CubeG4 from: https://www.st.com/en/embedded-software/stm32cubeg4.html
-# 2. Extract and replace the 'Drivers' folder
-# 3. Rebuild: cmake --build build/debug --clean-first
+# From the repo root
+./setup.ps1
 ```
 
-**Full drivers include**: Complete HAL peripherals (UART, SPI, I2C, etc.), BSP files, and documentation.
+What this does:
+- Checks for required tools (ARM GCC, CMake ≥ 3.20, Ninja)
+- Ensures STM32CubeG4 drivers (HAL + CMSIS Device/Core)
+   - Tries to fetch full drivers automatically
+   - Falls back to minimal drivers if a full download isn’t available
+- Configures CMake (Debug preset)
+- Builds and produces .elf, .hex, and .bin
 
-## Project Structure
+To flash after a successful build:
 
-The project is organized as follows:
-
-```
-stm32g491re-cmake
-├── CMakeLists.txt            # Main CMake configuration file
-├── CMakePresets.json         # CMake presets for different build configurations
-├── cmake                     # CMake configuration files
-│   ├── toolchain-gcc-arm-none-eabi.cmake  # Toolchain setup for ARM GCC
-│   ├── stm32g491re.cmake     # STM32G491RE specific configurations
-│   ├── flash.cmake           # Flashing configurations
-│   └── FindOpenOCD.cmake     # Locate OpenOCD tool
-├── linker                    # Linker script
-│   └── STM32G491RETx_FLASH.ld # Memory layout and sections
-├── scripts                   # Scripts for flashing and debugging
-│   ├── flash_openocd.sh      # Flashing script for Linux
-│   ├── flash_openocd.ps1     # Flashing script for Windows
-│   └── debug.gdb             # GDB commands for debugging
-├── scripts/openocd           # OpenOCD configuration files
-│   ├── interface_stlink.cfg   # ST-Link interface configuration
-│   └── target_stm32g4x.cfg    # STM32G4 target configuration
-├── src                       # Source files
-│   ├── main.c                # Main application source file
-│   └── system_stm32g4xx.c    # System initialization code
-├── include                   # Header files
-│   └── stm32g4xx_hal_conf.h   # HAL configuration settings
-├── Drivers                   # Driver files
-│   ├── CMSIS                 # CMSIS header files
-│   │   ├── Device            # Device specific headers
-│   │   │   └── ST
-│   │   │       └── STM32G4xx
-│   │   │           └── Include
-│   │   └── Include
-│   └── STM32G4xx_HAL_Driver  # STM32G4 HAL driver files
-│       ├── Inc               # Public header files
-│       └── Src               # Source files
-├── .vscode                   # Visual Studio Code settings
-│   ├── settings.json         # VS Code specific settings
-│   ├── tasks.json            # Build and flash tasks
-│   └── launch.json           # Debug configurations
-└── README.md                 # Project documentation
+```powershell
+cmake --build build/debug --target flash_openocd   # OpenOCD (ST-LINK)
+# or, if you have STM32CubeProgrammer CLI installed:
+cmake --build build/debug --target flash
 ```
 
-## Getting Started
+## Prerequisites
 
-1. **Prerequisites**: Ensure you have the ARM GCC toolchain and OpenOCD installed on your system.
+- ARM GNU Toolchain (arm-none-eabi-gcc): https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain
+- CMake ≥ 3.20: https://cmake.org/download/
+- Ninja: https://ninja-build.org/ (or `choco install ninja`)
+- One of the flash tools:
+   - OpenOCD (recommended for ST-LINK)
+   - STM32CubeProgrammer CLI (for the `flash` target)
 
-2. **Building the Project**:
-   - Navigate to the project directory.
-   - Create a build directory: `mkdir build && cd build`
-   - Run CMake: `cmake ..`
-   - Build the project: `cmake --build .`
+Optional: VS Code with CMake Tools extension.
 
-3. **Flashing the Firmware**:
-   - Use the provided scripts to flash the firmware to the STM32G491RE:
-     - For Linux: `./scripts/flash_openocd.sh`
-     - For Windows: `.\scripts\flash_openocd.ps1`
+## Build manually (alternative to setup.ps1)
 
-4. **Debugging**:
-   - Use the provided GDB commands in `scripts/debug.gdb` to debug your application.
+```powershell
+cmake --preset=debug
+cmake --build build/debug
+```
+
+Artifacts are placed in `build/debug/`.
+
+## Drivers: HAL/CMSIS
+
+This project manages drivers for you:
+
+- On first configure, CMake will try to download STM32CubeG4 and install the drivers under `Drivers/`.
+- If a full driver archive is incomplete (common with GitHub submodules), minimal drivers are generated so you can still build immediately.
+- You can force a full, robust install anytime with the helper script:
+
+```powershell
+./download-drivers.ps1
+```
+
+After installation you should have (at minimum):
+- `Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h`
+- `Drivers/STM32G4xx_HAL_Driver/Src/...`
+- `Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g491xx.h`
+- `Drivers/CMSIS/Include/core_cm4.h`
+
+Note: The build uses the official CMSIS `system_stm32g4xx.c` so HAL clock helpers (e.g., AHB/APB prescaler tables) are present.
+
+## Project layout (key files)
+
+```
+stm32-tiny-robot/
+├─ CMakeLists.txt                     # Main build config (CMake targets incl. flash/flash_openocd)
+├─ CMakePresets.json                  # Debug/Release presets
+├─ cmake/
+│  ├─ DownloadSTM32CubeG4.cmake       # Driver setup: download or create minimal
+│  ├─ toolchain-gcc-arm-none-eabi.cmake
+│  ├─ flash.cmake (if present)
+│  └─ FindOpenOCD.cmake (if present)
+├─ linker/
+│  └─ STM32G491RETx_FLASH.ld          # Linker script
+├─ scripts/
+│  ├─ flash_openocd.ps1               # Windows flashing helper (optional)
+│  ├─ flash_openocd.sh                # Linux/macOS helper (optional)
+│  └─ debug.gdb                       # Basic GDB script
+├─ scripts/openocd/
+│  ├─ interface_stlink.cfg
+│  └─ target_stm32g4x.cfg
+├─ src/
+│  ├─ main_hal.c                      # Example app using HAL
+│  └─ system_stm32g4xx.c              # Local stub (not used by default)
+├─ include/
+│  └─ stm32g4xx_hal_conf.h            # HAL configuration
+└─ Drivers/                           # HAL + CMSIS (installed automatically)
+```
+
+## Flashing
+
+If you have an ST-LINK and OpenOCD:
+
+```powershell
+cmake --build build/debug --target flash_openocd
+```
+
+If you installed STM32CubeProgrammer CLI:
+
+```powershell
+cmake --build build/debug --target flash
+```
+
+Tip (VS Code users): A “Flash” task is provided, but its ELF path may be a template in your workspace. If it fails, either update that task to point to `build/debug/STM32G491RE_Project` or use the CMake targets above.
+
+## Troubleshooting
+
+- Tools not found during setup
+   - Ensure `arm-none-eabi-gcc`, `cmake`, and `ninja` are on PATH.
+
+- Linker error about `AHBPrescTable`
+   - The project now uses the CMSIS device `system_stm32g4xx.c` (via CMake). Reconfigure and rebuild: `cmake --preset=debug && cmake --build build/debug`.
+
+   - Check USB cable/driver, try running OpenOCD with `-f scripts/openocd/interface_stlink.cfg -f scripts/openocd/target_stm32g4x.cfg`.
+
+- Flash task fails with a placeholder ELF path
+   - Update the VS Code task to the built ELF or use `--target flash_openocd`.
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+MIT — see LICENSE for details.
