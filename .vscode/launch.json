@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug STM32G491RE",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/your_project.elf",
+            "cwd": "${workspaceFolder}",
+            "servertype": "openocd",
+            "serverpath": "path/to/openocd",
+            "serverargs": [
+                "-f",
+                "interface/stlink.cfg",
+                "-f",
+                "target/stm32g4x.cfg"
+            ],
+            "executable": "${workspaceFolder}/build/your_project.elf",
+            "setupCommands": [
+                {
+                    "text": "target remote localhost:3333",
+                    "description": "Connect to GDB server",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "build",
+            "postDebugTask": "flash",
+            "stopAtEntry": false,
+            "runInTerminal": true,
+            "miDebuggerPath": "path/to/arm-none-eabi-gdb",
+            "miDebuggerArgs": "--eval-command=\"target remote localhost:3333\""
+        }
+    ]
+}

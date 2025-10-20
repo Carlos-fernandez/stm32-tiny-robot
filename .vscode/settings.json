@@ -1,0 +1,16 @@
+{
+    "cmake.configureOnOpen": true,
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.generator": "Ninja",
+    "cmake.toolchain": "${workspaceFolder}/cmake/toolchain-gcc-arm-none-eabi.cmake",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.default.intelliSenseMode": "gcc-arm",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/include",
+        "${workspaceFolder}/Drivers/**",
+        "${workspaceFolder}/src"
+    ],
+    "C_Cpp.default.defines": [
+        "STM32G491RE"
+    ]
+}
